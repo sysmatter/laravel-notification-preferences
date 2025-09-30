@@ -29,9 +29,3 @@ parameters:
 			identifier: trait.unused
 			count: 1
 			path: src/Traits/HasNotificationPreferences.php
-
-		-
-			message: '#^Trait SysMatter\\NotificationPreferences\\Traits\\HasPreferenceAwareNotifications is used zero times and is not analysed\.$#'
-			identifier: trait.unused
-			count: 1
-			path: src/Traits/HasPreferenceAwareNotifications.php

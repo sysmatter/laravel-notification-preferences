@@ -9,6 +9,10 @@ trait HasPreferenceAwareNotifications
      */
     public ?array $preferenceFilteredChannels = null;
 
+    /**
+     * @param mixed $notifiable
+     * @return array<string>
+     */
     public function via(mixed $notifiable): array
     {
         $originalChannels = $this->getOriginalChannels($notifiable);
