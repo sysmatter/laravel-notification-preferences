@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.0.0 - 2025-09-30
+
+- fix: fix filtering test (ab6e5db)
+- chore: add keywords (dfcc207)
+- chore: update CHANGELOG for v0.1.5-alpha (b9474cf)
+
 ## v0.1.5-alpha - 2025-09-30
 
 - fix: update via method to fix missed preferences (2fe31f7)
