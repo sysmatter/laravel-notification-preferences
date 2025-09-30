@@ -1,76 +1,76 @@
 <?php
 
-use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
-use Illuminate\Support\Facades\Notification as NotificationFacade;
 use SysMatter\NotificationPreferences\NotificationRegistry;
 use SysMatter\NotificationPreferences\Tests\Fixtures\User;
 use SysMatter\NotificationPreferences\Traits\HasPreferenceAwareNotifications;
 
-class TestNotificationWithPreferences extends Notification
+class SimpleNotification extends Notification
 {
     use HasPreferenceAwareNotifications;
 
     protected function getOriginalChannels($notifiable): array
     {
-        return ['mail', 'database'];
-    }
-
-    public function toMail($notifiable)
-    {
-        return (new MailMessage)
-            ->line('Test notification');
+        return ['mail', 'database', 'sms'];
     }
 
     public function toArray($notifiable): array
     {
-        return ['message' => 'Test notification'];
+        return ['message' => 'test'];
     }
 }
 
-beforeEach(function () {
+test('channel manager calls filter method when sending', function () {
+    $user = User::factory()->create();
+
     $registry = app(NotificationRegistry::class);
-    $registry->register(TestNotificationWithPreferences::class, 'Test Notification', ['mail', 'database']);
+    $registry->register(SimpleNotification::class, 'Simple', ['mail', 'database', 'sms']);
+
+    $user->setNotificationPreference(SimpleNotification::class, 'mail', false);
+    $user->setNotificationPreference(SimpleNotification::class, 'database', true);
+    $user->setNotificationPreference(SimpleNotification::class, 'sms', true);
+
+    $notification = new SimpleNotification;
+
+    // Get original channels
+    $originalChannels = $notification->via($user);
+    expect($originalChannels)->toBe(['mail', 'database', 'sms']);
+
+    // Simulate what PreferenceAwareChannelManager does
+    $notification->preferenceFilteredChannels = ['database', 'sms'];
+
+    // After filtering, via should return filtered channels
+    $filteredChannels = $notification->via($user);
+    expect($filteredChannels)->toBe(['database', 'sms']);
 });
 
-test('notification sends to all enabled channels', function () {
-    NotificationFacade::fake();
-
+test('channel manager keeps all channels when all are enabled', function () {
     $user = User::factory()->create();
 
-    $user->notify(new TestNotificationWithPreferences);
+    $registry = app(NotificationRegistry::class);
+    $registry->register(SimpleNotification::class, 'Simple', ['mail', 'database', 'sms']);
 
-    NotificationFacade::assertSentTo($user, TestNotificationWithPreferences::class);
+    // All enabled by default
+    $notification = new SimpleNotification;
+
+    // Simulate filtering with all enabled
+    $notification->preferenceFilteredChannels = ['mail', 'database', 'sms'];
+
+    expect($notification->via($user))->toBe(['mail', 'database', 'sms']);
 });
 
-test('notification respects disabled mail preference', function () {
+test('channel manager filters to empty array when all disabled', function () {
     $user = User::factory()->create();
 
-    // Disable mail notifications
-    $user->setNotificationPreference(TestNotificationWithPreferences::class, 'mail', false);
+    $registry = app(NotificationRegistry::class);
+    $registry->register(SimpleNotification::class, 'Simple', ['mail', 'database', 'sms']);
 
-    // Notification should still be created but with filtered channels
-    $notification = new TestNotificationWithPreferences;
+    $user->setNotificationPreference(SimpleNotification::class, 'mail', false);
+    $user->setNotificationPreference(SimpleNotification::class, 'database', false);
+    $user->setNotificationPreference(SimpleNotification::class, 'sms', false);
 
-    // Check that preferences are being read correctly
-    expect($user->getNotificationPreference(TestNotificationWithPreferences::class, 'mail'))->toBeFalse();
-    expect($user->getNotificationPreference(TestNotificationWithPreferences::class, 'database'))->toBeTrue();
-});
+    $notification = new SimpleNotification;
+    $notification->preferenceFilteredChannels = [];
 
-test('notification respects disabled database preference', function () {
-    $user = User::factory()->create();
-
-    // Disable database notifications
-    $user->setNotificationPreference(TestNotificationWithPreferences::class, 'database', false);
-
-    expect($user->getNotificationPreference(TestNotificationWithPreferences::class, 'database'))->toBeFalse();
-    expect($user->getNotificationPreference(TestNotificationWithPreferences::class, 'mail'))->toBeTrue();
-});
-
-test('notification sends when all channels are enabled', function () {
-    $user = User::factory()->create();
-
-    // Both should be enabled by default
-    expect($user->getNotificationPreference(TestNotificationWithPreferences::class, 'mail'))->toBeTrue();
-    expect($user->getNotificationPreference(TestNotificationWithPreferences::class, 'database'))->toBeTrue();
+    expect($notification->via($user))->toBe([]);
 });

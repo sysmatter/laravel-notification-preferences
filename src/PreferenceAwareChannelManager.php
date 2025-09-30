@@ -39,7 +39,6 @@ class PreferenceAwareChannelManager extends ChannelManager
     {
         $notifiableCollection = is_iterable($notifiables) ? $notifiables : [$notifiables];
         $notificationType = get_class($notification);
-        $preferenceManager = app(NotificationPreferenceManager::class);
 
         $filteredChannels = [];
 
