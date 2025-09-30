@@ -15,11 +15,11 @@ class NotificationPreferencesServiceProvider extends ServiceProvider
     {
         if (app()->runningInConsole()) {
             $this->publishes([
-                __DIR__ . '/../database/migrations/' => database_path('migrations'),
+                __DIR__.'/../database/migrations/' => database_path('migrations'),
             ], 'notification-preferences-migrations');
 
             $this->publishes([
-                __DIR__ . '/../config/config.php' => config_path('notification-preferences.php'),
+                __DIR__.'/../config/config.php' => config_path('notification-preferences.php'),
             ], 'notification-preferences-config');
         }
     }
@@ -29,7 +29,7 @@ class NotificationPreferencesServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->mergeConfigFrom(__DIR__ . '/../config/config.php', 'notification-preferences');
+        $this->mergeConfigFrom(__DIR__.'/../config/config.php', 'notification-preferences');
 
         $this->app->singleton(NotificationPreferenceManager::class);
         $this->app->singleton(NotificationRegistry::class);
