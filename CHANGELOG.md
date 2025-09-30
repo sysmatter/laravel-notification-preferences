@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.1.3-alpha - 2025-09-30
+
+- Merge branch 'main' of github.com:sysmatter/laravel-notification-preferences (4881ca2)
+- Update 0000_00_00_000000_create_notification_preferences_table.php (5e6c3b3)
+- Fix styling (2757283)
+
 ## v0.1.1-alpha - 2025-09-30
 
 - chore: move test notifications (55e76c4)
