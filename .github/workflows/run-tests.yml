@@ -65,7 +65,9 @@ jobs:
           coverage: xdebug
 
       - name: Install dependencies
-        run: composer update --prefer-stable --prefer-dist --no-interaction
+        run: |
+          composer require "laravel/framework:12.*" "orchestra/testbench:10.*" --no-interaction --no-update
+          composer update --prefer-stable --prefer-dist --no-interaction
 
       - name: Execute tests with coverage
         run: vendor/bin/pest --coverage --min=80
