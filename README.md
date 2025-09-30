@@ -192,8 +192,7 @@ class NotificationPreferencesController extends Controller
 {
     public function show(Request $request)
     {
-        $user = $request->user();
-        $preferencesTable = $user->getNotificationPreferencesTable();
+        $request->user()->getNotificationPreferencesTable();
 
         return view('notification-preferences', compact('preferencesTable'));
     }
@@ -206,8 +205,7 @@ class NotificationPreferencesController extends Controller
             'preferences.*.*' => 'boolean',
         ]);
 
-        $user = $request->user();
-        $user->updateNotificationPreferences($request->input('preferences'));
+        $request->user()->updateNotificationPreferences($request->input('preferences'));
 
         return back()->with('success', 'Preferences updated successfully!');
     }
@@ -254,15 +252,12 @@ class NotificationPreferencesController extends Controller
 {
     public function show(Request $request): Response
     {
-        $user = $request->user();
-        $preferencesTable = $user->getNotificationPreferencesTable();
-
-        return Inertia::render('NotificationPreferences', [
-            'preferencesTable' => $preferencesTable,
+        return Inertia::render('account/notification-preferences', [
+            'preferencesTable' => $request->user()->getNotificationPreferencesTable(),
         ]);
     }
 
-    public function update(Request $request)
+    public function update(Request $request): RedirectResponse
     {
         $request->validate([
             'preferences' => 'required|array',
@@ -270,8 +265,7 @@ class NotificationPreferencesController extends Controller
             'preferences.*.*' => 'boolean',
         ]);
 
-        $user = $request->user();
-        $user->updateNotificationPreferences($request->input('preferences'));
+        $request->user()->updateNotificationPreferences($request->input('preferences'));
 
         return back()->with('success', 'Notification preferences updated successfully!');
     }
