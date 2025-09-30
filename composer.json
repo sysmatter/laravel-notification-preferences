@@ -1,0 +1,77 @@
+{
+  "name": "sysmatter/repository-name",
+  "description": "Package description",
+  "keywords": [
+    "laravel"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/sysmatter/repository-name",
+  "support": {
+    "issues": "https://github.com/sysmatter/repository-name/issues",
+    "source": "https://github.com/sysmatter/repository-name"
+  },
+  "authors": [
+    {
+      "name": "Shavonn Brown",
+      "email": "shavonn@sysmatter.com"
+    }
+  ],
+  "scripts": {
+    "test": "pest",
+    "test-coverage": "pest --coverage",
+    "test-unit": "pest tests/Unit",
+    "test-feature": "pest tests/Feature",
+    "phpstan": "php -d memory_limit=512M vendor/bin/phpstan analyse -c phpstan.neon --memory-limit=512M",
+    "pint": "vendor/bin/pint ./src ./tests"
+  },
+  "require": {
+    "php": "^8.4",
+    "illuminate/support": "^12.0"
+  },
+  "require-dev": {
+    "laravel/pint": "^1.25",
+    "orchestra/testbench": "^10.6",
+    "pestphp/pest": "^4.1",
+    "pestphp/pest-plugin-laravel": "^4.0",
+    "phpstan/phpstan": "^2.1",
+    "phpunit/phpunit": "^12.3",
+    "roave/security-advisories": "dev-latest"
+  },
+  "autoload": {
+    "psr-4": {
+      "SysMatter\\PackageName\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "SysMatter\\PackageName\\Tests\\": "tests/"
+    }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "SysMatter\\PackageName\\PackageNameServiceProvider"
+      ]
+    },
+    "hooks": {
+      "pre-commit": [
+        "composer pint",
+        "composer test"
+      ],
+      "pre-push": [
+        "composer pint",
+        "composer test"
+      ]
+    }
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "config": {
+    "sort-packages": true,
+    "preferred-install": "dist",
+    "optimize-autoloader": true,
+    "allow-plugins": {
+      "pestphp/pest-plugin": true
+    }
+  }
+}

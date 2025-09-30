@@ -1,0 +1,96 @@
+name: Create Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.3
+          extensions: dom, curl, libxml, mbstring, zip
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-interaction
+
+      - name: Get previous tag
+        id: previoustag
+        run: |
+          PREV_TAG=$(git describe --abbrev=0 --tags $(git rev-list --tags --skip=1 --max-count=1) 2>/dev/null || echo "")
+          echo "tag=${PREV_TAG}" >> $GITHUB_OUTPUT
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          if [ -z "${{ steps.previoustag.outputs.tag }}" ]; then
+            CHANGELOG=$(git log --pretty=format:"- %s (%h)" ${{ github.ref_name }})
+          else
+            CHANGELOG=$(git log --pretty=format:"- %s (%h)" ${{ steps.previoustag.outputs.tag }}..${{ github.ref_name }})
+          fi
+          echo "changelog<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGELOG" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Update CHANGELOG.md
+        run: |
+          VERSION="${{ github.ref_name }}"
+          DATE=$(date +%Y-%m-%d)
+          
+          # Create changelog entry
+          cat > /tmp/new_changelog.md << EOF
+          ## ${VERSION} - ${DATE}
+          
+          ${{ steps.changelog.outputs.changelog }}
+          
+          EOF
+          
+          # If CHANGELOG.md exists, prepend to it; otherwise create it
+          if [ -f CHANGELOG.md ]; then
+            # Find the line after the first heading and insert there
+            sed -i "2r /tmp/new_changelog.md" CHANGELOG.md
+          else
+            cat > CHANGELOG.md << EOF
+          # Changelog
+          
+          All notable changes to this project will be documented in this file.
+          
+          $(cat /tmp/new_changelog.md)
+          EOF
+          fi
+
+      - name: Commit changelog
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add CHANGELOG.md
+          git commit -m "Update CHANGELOG for ${{ github.ref_name }}" || echo "No changes to commit"
+          git push origin HEAD:main || echo "No changes to push"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          body: |
+            ## What's Changed
+            
+            ${{ steps.changelog.outputs.changelog }}
+            
+            **Full Changelog**: https://github.com/${{ github.repository }}/compare/${{ steps.previoustag.outputs.tag }}...${{ github.ref_name }}
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
