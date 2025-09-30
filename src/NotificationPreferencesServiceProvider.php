@@ -14,14 +14,12 @@ class NotificationPreferencesServiceProvider extends ServiceProvider
     public function boot(): void
     {
         if (app()->runningInConsole()) {
-            $timestamp = date('Y_m_d_His');
-
             $this->publishes([
-                __DIR__.'/../database/migrations/create_notification_preferences_table.php.stub' => database_path("migrations/{$timestamp}_create_notification_preferences_table.php"),
+                __DIR__ . '/../database/migrations/' => database_path('migrations'),
             ], 'notification-preferences-migrations');
 
             $this->publishes([
-                __DIR__.'/../config/notification-preferences.php' => config_path('notification-preferences.php'),
+                __DIR__ . '/../config/config.php' => config_path('notification-preferences.php'),
             ], 'notification-preferences-config');
         }
     }
@@ -31,7 +29,7 @@ class NotificationPreferencesServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->mergeConfigFrom(__DIR__.'/../config/config.php', 'notification-preferences');
+        $this->mergeConfigFrom(__DIR__ . '/../config/config.php', 'notification-preferences');
 
         $this->app->singleton(NotificationPreferenceManager::class);
         $this->app->singleton(NotificationRegistry::class);
