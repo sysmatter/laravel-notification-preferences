@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.1.5-alpha - 2025-09-30
+
+- fix: update via method to fix missed preferences (2fe31f7)
+- chore: implify controller example (a811bf3)
+- chore: update CHANGELOG for v0.1.4-alpha (019a981)
+
 ## v0.1.4-alpha - 2025-09-30
 
 - Merge branch 'main' of github.com:sysmatter/laravel-notification-preferences (836ef36)
