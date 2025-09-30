@@ -156,7 +156,32 @@ class AppServiceProvider extends ServiceProvider
 
 ### 3. Update Your Notification Classes
 
-Add the preference-aware trait to your notifications:
+You have two options for making notifications preference-aware:
+
+#### Option A: Extend the Base Class (Recommended for simplicity)
+
+```php
+<?php
+    
+namespace App\Notifications;
+
+use SysMatter\NotificationPreferences\PreferenceAwareNotification;
+
+class OrderShipped extends PreferenceAwareNotification
+{
+    // That's it! By default, uses all channels from config
+    
+    // Optional: Override to customize channels for this notification
+    protected function getOriginalChannels($notifiable): array
+    {
+        return ['mail', 'database', 'sms'];
+    }
+
+    // ... rest of your notification implementation
+}
+```
+
+#### Option B: Use the Trait Directly
 
 ```php
 <?php
