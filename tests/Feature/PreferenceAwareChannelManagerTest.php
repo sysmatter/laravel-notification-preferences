@@ -1,21 +1,10 @@
 <?php
 
 use Illuminate\Notifications\ChannelManager;
-use Illuminate\Notifications\Notification;
 use SysMatter\NotificationPreferences\NotificationRegistry;
 use SysMatter\NotificationPreferences\PreferenceAwareChannelManager;
+use SysMatter\NotificationPreferences\Tests\Fixtures\TestableNotification;
 use SysMatter\NotificationPreferences\Tests\Fixtures\User;
-use SysMatter\NotificationPreferences\Traits\HasPreferenceAwareNotifications;
-
-class TestableNotification extends Notification
-{
-    use HasPreferenceAwareNotifications;
-
-    protected function getOriginalChannels($notifiable): array
-    {
-        return ['mail', 'database'];
-    }
-}
 
 test('filterChannelsByPreferences method filters channels based on user preferences', function () {
     $user = User::factory()->create();
