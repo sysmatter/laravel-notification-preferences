@@ -26,14 +26,14 @@ class TestFilteredNotification extends Notification
 
 test('preference aware notification via method uses original channels by default', function () {
     $user = User::factory()->create();
-    $notification = new TestFilteredNotification();
+    $notification = new TestFilteredNotification;
 
     expect($notification->via($user))->toBe(['mail', 'database']);
 });
 
 test('preference aware notification via method uses filtered channels when set', function () {
     $user = User::factory()->create();
-    $notification = new TestFilteredNotification();
+    $notification = new TestFilteredNotification;
 
     $notification->preferenceFilteredChannels = ['database'];
 
