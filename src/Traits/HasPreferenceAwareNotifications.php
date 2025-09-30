@@ -9,10 +9,25 @@ trait HasPreferenceAwareNotifications
      */
     public ?array $preferenceFilteredChannels = null;
 
-    public function via(mixed $notifiable): ?array
+    public function via(mixed $notifiable): array
     {
-        // If channels were filtered by preferences, use those
-        return $this->preferenceFilteredChannels ?? $this->getOriginalChannels($notifiable);
+        $originalChannels = $this->getOriginalChannels($notifiable);
+
+        // Filter channels based on preferences
+        if (method_exists($notifiable, 'getNotificationPreference')) {
+            $notificationType = get_class($this);
+            $filteredChannels = [];
+
+            foreach ($originalChannels as $channel) {
+                if ($notifiable->getNotificationPreference($notificationType, $channel)) {
+                    $filteredChannels[] = $channel;
+                }
+            }
+
+            return $filteredChannels;
+        }
+
+        return $originalChannels;
     }
 
     abstract protected function getOriginalChannels($notifiable): array;
