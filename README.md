@@ -19,8 +19,8 @@ or disable specific notifications for email, SMS, push notifications, and more.
 
 ## Requirements
 
-- PHP 8.4+
-- Laravel 12.0+
+- PHP ^8.2+
+- Laravel ^11.0+
 
 ## Installation
 
