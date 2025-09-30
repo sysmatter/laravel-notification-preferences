@@ -1,0 +1,37 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Method SysMatter\\NotificationPreferences\\Models\\NotificationPreference\:\:user\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Models/NotificationPreference.php
+
+		-
+			message: '#^Unable to resolve the template type TRelatedModel in call to method Illuminate\\Database\\Eloquent\\Model\:\:belongsTo\(\)$#'
+			identifier: argument.templateType
+			count: 1
+			path: src/Models/NotificationPreference.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 4
+			path: src/NotificationPreferenceManager.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Notifications\\Notification\:\:\$preferenceFilteredChannels\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/PreferenceAwareChannelManager.php
+
+		-
+			message: '#^Trait SysMatter\\NotificationPreferences\\Traits\\HasNotificationPreferences is used zero times and is not analysed\.$#'
+			identifier: trait.unused
+			count: 1
+			path: src/Traits/HasNotificationPreferences.php
+
+		-
+			message: '#^Trait SysMatter\\NotificationPreferences\\Traits\\HasPreferenceAwareNotifications is used zero times and is not analysed\.$#'
+			identifier: trait.unused
+			count: 1
+			path: src/Traits/HasPreferenceAwareNotifications.php

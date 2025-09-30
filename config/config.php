@@ -9,7 +9,7 @@ return [
     | The model that represents users in your application
     |
     */
-    'user_model' => env('NOTIFICATION_PREFERENCES_USER_MODEL', 'App\Models\User'),
+    'user_model' => 'App\Models\User',
 
     /*
     |--------------------------------------------------------------------------

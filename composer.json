@@ -33,7 +33,9 @@
     "laravel/pint": "^1.25",
     "orchestra/testbench": "^10.6",
     "pestphp/pest": "^4.1",
+    "phpstan/extension-installer": "^1.4",
     "phpstan/phpstan": "^2.1",
+    "phpstan/phpstan-phpunit": "^2.0",
     "phpunit/phpunit": "^12.3",
     "roave/security-advisories": "dev-latest"
   },

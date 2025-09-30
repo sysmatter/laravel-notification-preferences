@@ -5,6 +5,7 @@ namespace SysMatter\NotificationPreferences;
 use Illuminate\Container\Container;
 use Illuminate\Notifications\ChannelManager;
 use Illuminate\Notifications\Notification;
+use ReflectionClass;
 
 class PreferenceAwareChannelManager extends ChannelManager
 {
@@ -16,7 +17,7 @@ class PreferenceAwareChannelManager extends ChannelManager
         $this->originalManager = $originalManager;
     }
 
-    public function send($notifiables, $notification)
+    public function send(mixed $notifiables, $notification): void
     {
         // Filter channels based on user preferences
         if (method_exists($notification, 'via')) {
@@ -27,10 +28,14 @@ class PreferenceAwareChannelManager extends ChannelManager
             $this->overrideViaMethod($notification, $filteredChannels);
         }
 
-        return $this->originalManager->send($notifiables, $notification);
+        $this->originalManager->send($notifiables, $notification);
     }
 
-    private function filterChannelsByPreferences($notifiables, Notification $notification, array $channels): array
+    /**
+     * @param  array<int, string>  $channels
+     * @return array<int, string>
+     */
+    private function filterChannelsByPreferences(mixed $notifiables, Notification $notification, array $channels): array
     {
         $notifiableCollection = is_iterable($notifiables) ? $notifiables : [$notifiables];
         $notificationType = get_class($notification);
@@ -62,10 +67,13 @@ class PreferenceAwareChannelManager extends ChannelManager
         return $filteredChannels;
     }
 
+    /**
+     * @param  array<int, string>  $channels
+     */
     private function overrideViaMethod(Notification $notification, array $channels): void
     {
         // Use reflection to temporarily override the via method
-        $reflection = new \ReflectionClass($notification);
+        $reflection = new ReflectionClass($notification);
         if ($reflection->hasMethod('via')) {
             $notification->preferenceFilteredChannels = $channels;
         }

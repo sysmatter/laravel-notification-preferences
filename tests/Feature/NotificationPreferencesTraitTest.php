@@ -1,6 +1,7 @@
 <?php
 
 use SysMatter\NotificationPreferences\Models\NotificationPreference;
+use SysMatter\NotificationPreferences\NotificationRegistry;
 use SysMatter\NotificationPreferences\Tests\Fixtures\User;
 
 beforeEach(function () {
@@ -32,7 +33,7 @@ test('user can set notification preference', function () {
 });
 
 test('user can get preferences table', function () {
-    $registry = app(\SysMatter\NotificationPreferences\NotificationRegistry::class);
+    $registry = app(NotificationRegistry::class);
     $registry->register('TestNotification', 'Test Notification', ['mail', 'sms']);
 
     $table = $this->user->getNotificationPreferencesTable();

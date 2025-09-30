@@ -4,15 +4,15 @@ namespace SysMatter\NotificationPreferences\Traits;
 
 trait HasPreferenceAwareNotifications
 {
-    public function via($notifiable)
+    /**
+     * @var array<int, string>|null
+     */
+    public ?array $preferenceFilteredChannels = null;
+
+    public function via(mixed $notifiable): ?array
     {
         // If channels were filtered by preferences, use those
-        if (isset($this->preferenceFilteredChannels)) {
-            return $this->preferenceFilteredChannels;
-        }
-
-        // Otherwise, use the original via method
-        return $this->getOriginalChannels($notifiable);
+        return $this->preferenceFilteredChannels ?? $this->getOriginalChannels($notifiable);
     }
 
     abstract protected function getOriginalChannels($notifiable): array;

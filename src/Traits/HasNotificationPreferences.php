@@ -25,12 +25,22 @@ trait HasNotificationPreferences
             ->setPreference($this, $notificationType, $channel, $enabled);
     }
 
+    /**
+     * @return array<int, array{
+     *     notification_type: string,
+     *     notification_name: string,
+     *     channels: array<string, array{name: string, enabled: bool}>
+     * }>
+     */
     public function getNotificationPreferencesTable(): array
     {
         return app(NotificationPreferenceManager::class)
             ->getPreferencesTable($this);
     }
 
+    /**
+     * @param  array<string, array<string, bool>>  $preferences
+     */
     public function updateNotificationPreferences(array $preferences): void
     {
         app(NotificationPreferenceManager::class)

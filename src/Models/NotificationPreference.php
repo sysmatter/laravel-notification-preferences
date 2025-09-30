@@ -2,10 +2,9 @@
 
 namespace SysMatter\NotificationPreferences\Models;
 
-use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Query\Builder;
 
 class NotificationPreference extends Model
 {
@@ -17,7 +16,7 @@ class NotificationPreference extends Model
     ];
 
     /**
-     * @var string[]
+     * @var array<string,string>
      */
     protected $casts = [
         'enabled' => 'boolean',
@@ -28,26 +27,38 @@ class NotificationPreference extends Model
         return $this->belongsTo(config('notification-preferences.user_model'));
     }
 
-    #[Scope]
-    protected function forUser(Builder $query, $userId): Builder
+    /**
+     * @param  Builder<NotificationPreference>  $query
+     * @return Builder<NotificationPreference>
+     */
+    protected function scopeForUser(Builder $query, int|string $userId): Builder
     {
         return $query->where('user_id', $userId);
     }
 
-    #[Scope]
-    protected function forNotification(Builder $query, string $notificationType): Builder
+    /**
+     * @param  Builder<NotificationPreference>  $query
+     * @return Builder<NotificationPreference>
+     */
+    public function scopeForNotification(Builder $query, string $notificationType): Builder
     {
         return $query->where('notification_type', $notificationType);
     }
 
-    #[Scope]
-    protected function forChannel(Builder $query, string $channel): Builder
+    /**
+     * @param  Builder<NotificationPreference>  $query
+     * @return Builder<NotificationPreference>
+     */
+    protected function scopeForChannel(Builder $query, string $channel): Builder
     {
         return $query->where('channel', $channel);
     }
 
-    #[Scope]
-    protected function enabled(Builder $query): Builder
+    /**
+     * @param  Builder<NotificationPreference>  $query
+     * @return Builder<NotificationPreference>
+     */
+    protected function scopeIsEnabled(Builder $query): Builder
     {
         return $query->where('enabled', true);
     }

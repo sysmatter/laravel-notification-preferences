@@ -72,6 +72,9 @@ class NotificationPreferenceManager
         return $table;
     }
 
+    /**
+     * @param  array<string, array<string, bool>>  $preferences
+     */
     public function updatePreferences(Model $user, array $preferences): void
     {
         foreach ($preferences as $notificationType => $channels) {
@@ -88,7 +91,7 @@ class NotificationPreferenceManager
             ->forChannel($channel)
             ->first();
 
-        return $preference?->enabled ?? config('notification-preferences.default_enabled', true);
+        return $preference->enabled ?? config('notification-preferences.default_enabled', true);
     }
 
     private function getCacheKey(int|string $userId, string $notificationType, string $channel): string
