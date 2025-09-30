@@ -2,7 +2,10 @@
   "name": "sysmatter/laravel-notification-preferences",
   "description": "Laravel package for managing user notification preferences across channels.",
   "keywords": [
-    "laravel"
+    "laravel",
+    "notifications",
+    "preferences",
+    "settings"
   ],
   "license": "MIT",
   "homepage": "https://github.com/sysmatter/laravel-notification-preferences",
