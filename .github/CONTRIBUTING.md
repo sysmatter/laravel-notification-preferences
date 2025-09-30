@@ -1,6 +1,7 @@
-# Contributing to [Package Name]
+# Contributing to Laravel Notification Preferences
 
-Thanks for considering contributing to [Package Name]! This document outlines the process for contributing to this
+Thanks for considering contributing to Laravel Notification Preferences! This document outlines the process for
+contributing to this
 project.
 
 ## Code of Conduct
@@ -48,7 +49,7 @@ template and include:
 Clone your fork:
 
 ```bash
-git clone https://github.com/sysmatter/repository-name.git
+git clone https://github.com/sysmatter/laravel-notification-preferences.git
 ```
 
 Install dependencies:

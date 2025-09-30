@@ -2,17 +2,27 @@
 
 declare(strict_types=1);
 
-namespace SysMatter\PackageName;
+namespace SysMatter\NotificationPreferences;
 
 use Illuminate\Support\ServiceProvider;
 
-class PackageNameServiceProvider extends ServiceProvider
+class NotificationPreferencesServiceProvider extends ServiceProvider
 {
     /**
      * Bootstrap the application services.
      */
     public function boot(): void
     {
+        if (app()->runningInConsole()) {
+            $this->publishes([
+                __DIR__.'/../database/migrations/' => database_path('migrations'),
+            ], 'notification-preferences-migrations');
+
+            $this->publishes([
+                __DIR__.'/../config/notification-preferences.php' => config_path('notification-preferences.php'),
+            ], 'notification-preferences-config');
+        }
+
         /*
          * Optional methods to load your package assets
          */
@@ -51,7 +61,9 @@ class PackageNameServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        // Automatically apply the package configuration
-        // $this->mergeConfigFrom(__DIR__.'/../config/config.php', 'package-name');
+        $this->mergeConfigFrom(__DIR__.'/../config/config.php', 'notification-preferences');
+
+        $this->app->singleton(NotificationPreferenceManager::class);
+        $this->app->singleton(NotificationRegistry::class);
     }
 }

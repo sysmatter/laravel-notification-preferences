@@ -1,14 +1,14 @@
 {
-  "name": "sysmatter/repository-name",
-  "description": "Package description",
+  "name": "sysmatter/laravel-notification-preferences",
+  "description": "Laravel package for managing user notification preferences across channels.",
   "keywords": [
     "laravel"
   ],
   "license": "MIT",
-  "homepage": "https://github.com/sysmatter/repository-name",
+  "homepage": "https://github.com/sysmatter/laravel-notification-preferences",
   "support": {
-    "issues": "https://github.com/sysmatter/repository-name/issues",
-    "source": "https://github.com/sysmatter/repository-name"
+    "issues": "https://github.com/sysmatter/laravel-notification-preferences/issues",
+    "source": "https://github.com/sysmatter/laravel-notification-preferences"
   },
   "authors": [
     {
@@ -29,28 +29,28 @@
     "illuminate/support": "^12.0"
   },
   "require-dev": {
+    "larastan/larastan": "^3.7",
     "laravel/pint": "^1.25",
     "orchestra/testbench": "^10.6",
     "pestphp/pest": "^4.1",
-    "pestphp/pest-plugin-laravel": "^4.0",
     "phpstan/phpstan": "^2.1",
     "phpunit/phpunit": "^12.3",
     "roave/security-advisories": "dev-latest"
   },
   "autoload": {
     "psr-4": {
-      "SysMatter\\PackageName\\": "src/"
+      "SysMatter\\NotificationPreferences\\": "src/"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "SysMatter\\PackageName\\Tests\\": "tests/"
+      "SysMatter\\NotificationPreferences\\Tests\\": "tests/"
     }
   },
   "extra": {
     "laravel": {
       "providers": [
-        "SysMatter\\PackageName\\PackageNameServiceProvider"
+        "SysMatter\\NotificationPreferences\\NotificationPreferencesServiceProvider"
       ]
     },
     "hooks": {
@@ -71,7 +71,8 @@
     "preferred-install": "dist",
     "optimize-autoloader": true,
     "allow-plugins": {
-      "pestphp/pest-plugin": true
+      "pestphp/pest-plugin": true,
+      "phpstan/extension-installer": true
     }
   }
 }

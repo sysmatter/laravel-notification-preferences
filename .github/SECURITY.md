@@ -84,4 +84,4 @@ If you have suggestions on how this process could be improved, please submit a p
 
 ---
 
-Thank you for helping keep [Package Name] and our users safe!
+Thank you for helping keep Laravel Notification Preferences and our users safe!
