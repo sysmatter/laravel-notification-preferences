@@ -5,12 +5,14 @@ namespace SysMatter\NotificationPreferences\Tests\Fixtures;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 use SysMatter\NotificationPreferences\Traits\HasNotificationPreferences;
 
 class User extends Authenticatable
 {
     use HasFactory;
     use HasNotificationPreferences;
+    use Notifiable;
 
     protected $fillable = [
         'name',
