@@ -3,7 +3,7 @@
 use SysMatter\NotificationPreferences\NotificationRegistry;
 
 beforeEach(function () {
-    $this->registry = new NotificationRegistry;
+    $this->registry = new NotificationRegistry();
 });
 
 test('it registers notifications correctly', function () {

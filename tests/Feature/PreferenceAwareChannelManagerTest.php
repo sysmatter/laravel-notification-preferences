@@ -19,7 +19,7 @@ test('filterChannelsByPreferences method filters channels based on user preferen
     $originalManager = app(ChannelManager::class);
     $manager = new PreferenceAwareChannelManager(app(), $originalManager);
 
-    $notification = new TestableNotification;
+    $notification = new TestableNotification();
 
     // Use reflection to call the private method
     $reflection = new ReflectionClass($manager);
@@ -40,7 +40,7 @@ test('filterChannelsByPreferences keeps all channels when all enabled', function
     $originalManager = app(ChannelManager::class);
     $manager = new PreferenceAwareChannelManager(app(), $originalManager);
 
-    $notification = new TestableNotification;
+    $notification = new TestableNotification();
 
     $reflection = new ReflectionClass($manager);
     $method = $reflection->getMethod('filterChannelsByPreferences');
@@ -63,7 +63,7 @@ test('filterChannelsByPreferences returns empty array when all disabled', functi
     $originalManager = app(ChannelManager::class);
     $manager = new PreferenceAwareChannelManager(app(), $originalManager);
 
-    $notification = new TestableNotification;
+    $notification = new TestableNotification();
 
     $reflection = new ReflectionClass($manager);
     $method = $reflection->getMethod('filterChannelsByPreferences');
@@ -78,7 +78,7 @@ test('overrideViaMethod sets preferenceFilteredChannels property', function () {
     $originalManager = app(ChannelManager::class);
     $manager = new PreferenceAwareChannelManager(app(), $originalManager);
 
-    $notification = new TestableNotification;
+    $notification = new TestableNotification();
 
     $reflection = new ReflectionClass($manager);
     $method = $reflection->getMethod('overrideViaMethod');
