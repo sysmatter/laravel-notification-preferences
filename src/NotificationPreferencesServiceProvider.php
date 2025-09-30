@@ -14,8 +14,10 @@ class NotificationPreferencesServiceProvider extends ServiceProvider
     public function boot(): void
     {
         if (app()->runningInConsole()) {
+            $timestamp = date('Y_m_d_His');
+
             $this->publishes([
-                __DIR__.'/../database/migrations/' => database_path('migrations'),
+                __DIR__.'/../database/migrations/create_notification_preferences_table.php' => database_path("migrations/{$timestamp}_create_notification_preferences_table.php"),
             ], 'notification-preferences-migrations');
 
             $this->publishes([
