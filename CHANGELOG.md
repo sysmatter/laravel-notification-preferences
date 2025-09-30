@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.2.0 - 2025-09-30
+
+- Merge pull request #7 from sysmatter/add-notification-abstract (5c8b667)
+
 ## v1.0.0 - 2025-09-30
 
 - fix: fix filtering test (ab6e5db)
