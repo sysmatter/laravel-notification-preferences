@@ -5,11 +5,8 @@ namespace SysMatter\NotificationPreferences\Traits;
 trait HasPreferenceAwareNotifications
 {
     /**
-     * @var array<int, string>|null
-     */
-    public ?array $preferenceFilteredChannels = null;
-
-    /**
+     * Get the notification's delivery channels, filtered by user preferences.
+     *
      * @param mixed $notifiable
      * @return array<string>
      */
@@ -34,5 +31,12 @@ trait HasPreferenceAwareNotifications
         return $originalChannels;
     }
 
-    abstract protected function getOriginalChannels($notifiable): array;
+    /**
+     * Get the original channels before preference filtering.
+     * Override this method in your notification classes.
+     *
+     * @param mixed $notifiable
+     * @return array<string>
+     */
+    abstract protected function getOriginalChannels(mixed $notifiable): array;
 }

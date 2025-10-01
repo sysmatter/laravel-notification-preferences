@@ -43,63 +43,7 @@ Optionally, publish the config file:
 php artisan vendor:publish --tag="notification-preferences-config"
 ```
 
-This is the contents of the published config file:
-
-```php
-return [
-    /*
-    |--------------------------------------------------------------------------
-    | User Model
-    |--------------------------------------------------------------------------
-    |
-    | The model that represents users in your application
-    |
-    */
-    'user_model' => env('NOTIFICATION_PREFERENCES_USER_MODEL', 'App\Models\User'),
-
-    /*
-    |--------------------------------------------------------------------------
-    | Default Channels
-    |--------------------------------------------------------------------------
-    |
-    | Default notification channels available in your application
-    |
-    */
-    'default_channels' => [
-        'mail' => 'Email',
-        'database' => 'In-App',
-        'sms' => 'SMS',
-        'push' => 'Push Notifications',
-    ],
-
-    /*
-    |--------------------------------------------------------------------------
-    | Default Preferences
-    |--------------------------------------------------------------------------
-    |
-    | Default preference state for new notifications/users
-    |
-    */
-    'default_enabled' => true,
-
-    /*
-    |--------------------------------------------------------------------------
-    | Cache Settings
-    |--------------------------------------------------------------------------
-    |
-    | Cache preferences for performance
-    |
-    */
-    'cache' => [
-        'enabled' => true,
-        'ttl' => 3600, // 1 hour
-        'prefix' => 'notification_preferences',
-    ],
-];
-
-```
-
-## Usage
+## Quick Start
 
 ### 1. Add the Trait to Your User Model
 
@@ -154,11 +98,11 @@ class AppServiceProvider extends ServiceProvider
 }
 ```
 
-### 3. Update Your Notification Classes
+### 3. Make Notifications Preference-Aware
 
-You have two options for making notifications preference-aware:
+You have two options:
 
-#### Option A: Extend the Base Class (Recommended for simplicity)
+#### Option A: Extend the Base Class (Recommended)
 
 ```php
 <?php
@@ -169,7 +113,7 @@ use SysMatter\NotificationPreferences\PreferenceAwareNotification;
 
 class OrderShipped extends PreferenceAwareNotification
 {
-    // That's it! By default, uses all channels from config
+    // That's it! By default uses all channels from config
     
     // Optional: Override to customize channels for this notification
     protected function getOriginalChannels($notifiable): array
@@ -177,11 +121,19 @@ class OrderShipped extends PreferenceAwareNotification
         return ['mail', 'database', 'sms'];
     }
 
-    // ... rest of your notification implementation
+    public function toMail($notifiable)
+    {
+        // Your mail notification logic
+    }
+
+    public function toArray($notifiable)
+    {
+        // Your database notification logic
+    }
 }
 ```
 
-#### Option B: Use the Trait Directly
+#### Option B: Use the Trait
 
 ```php
 <?php
@@ -200,11 +152,23 @@ class OrderShipped extends Notification
         return ['mail', 'database', 'sms'];
     }
 
-    // ... rest of your notification implementation
+    public function toMail($notifiable)
+    {
+        // Your mail notification logic
+    }
+
+    public function toArray($notifiable)
+    {
+        // Your database notification logic
+    }
 }
 ```
 
-### 4. Create a Settings Form
+### 4. Build a Settings Interface
+
+#### Option A: Traditional Blade Views
+
+Create a controller:
 
 ```php
 <?php
@@ -217,7 +181,7 @@ class NotificationPreferencesController extends Controller
 {
     public function show(Request $request)
     {
-        $request->user()->getNotificationPreferencesTable();
+        $preferencesTable = $request->user()->getNotificationPreferencesTable();
 
         return view('notification-preferences', compact('preferencesTable'));
     }
@@ -237,32 +201,50 @@ class NotificationPreferencesController extends Controller
 }
 ```
 
-### 5. Build the Settings UI
-
-The package provides table-ready data structure:
+Create a view:
 
 ```blade
-@foreach($preferencesTable as $notification)
-    <tr>
-        <td>{{ $notification['notification_name'] }}</td>
-        @foreach($notification['channels'] as $channel => $channelData)
-            <td>
-                <input 
-                    type="checkbox" 
-                    name="preferences[{{ $notification['notification_type'] }}][{{ $channel }}]"
-                    value="1"
-                    {{ $channelData['enabled'] ? 'checked' : '' }}
-                >
-                {{ $channelData['name'] }}
-            </td>
-        @endforeach
-    </tr>
-@endforeach
+<form method="POST" action="{{ route('notification-preferences.update') }}">
+    @csrf
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Notification</th>
+                @php
+                    $channels = collect($preferencesTable)->first()['channels'] ?? [];
+                @endphp
+                @foreach($channels as $channel => $data)
+                    <th>{{ $data['name'] }}</th>
+                @endforeach
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($preferencesTable as $notification)
+                <tr>
+                    <td>{{ $notification['notification_name'] }}</td>
+                    @foreach($notification['channels'] as $channel => $channelData)
+                        <td>
+                            <input 
+                                type="checkbox" 
+                                name="preferences[{{ $notification['notification_type'] }}][{{ $channel }}]"
+                                value="1"
+                                {{ $channelData['enabled'] ? 'checked' : '' }}
+                            >
+                        </td>
+                    @endforeach
+                </tr>
+            @endforeach
+        </tbody>
+    </table>
+    
+    <button type="submit">Save Preferences</button>
+</form>
 ```
 
-## Usage with Inertia.js + React
+#### Option B: Inertia.js + React
 
-### Controller Setup
+Create a controller:
 
 ```php
 <?php
@@ -277,7 +259,7 @@ class NotificationPreferencesController extends Controller
 {
     public function show(Request $request): Response
     {
-        return Inertia::render('account/notification-preferences', [
+        return Inertia::render('NotificationPreferences', [
             'preferencesTable' => $request->user()->getNotificationPreferencesTable(),
         ]);
     }
@@ -297,7 +279,7 @@ class NotificationPreferencesController extends Controller
 }
 ```
 
-### Form-Based React Component
+Create a React component:
 
 ```tsx
 // resources/js/Pages/NotificationPreferences.tsx
@@ -323,7 +305,7 @@ interface Props {
 }
 
 export default function NotificationPreferences({preferencesTable, flash}: Props) {
-    // Use Inertia's useForm with the preferences data structure
+    // Initialize form with current preferences
     const {data, setData, post, processing} = useForm({
         preferences: Object.fromEntries(
             preferencesTable.map(notification => [
@@ -353,7 +335,7 @@ export default function NotificationPreferences({preferencesTable, flash}: Props
         });
     };
 
-    // Get all unique channels for headers
+    // Get all unique channels for table headers
     const allChannels = Array.from(new Set(
         preferencesTable.flatMap(n => Object.keys(n.channels))
     ));
@@ -386,8 +368,10 @@ export default function NotificationPreferences({preferencesTable, flash}: Props
                                         Notification Type
                                     </th>
                                     {allChannels.map(channel => (
-                                        <th key={channel}
-                                            className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <th
+                                            key={channel}
+                                            className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                        >
                                             {getChannelName(channel)}
                                         </th>
                                     ))}
@@ -446,10 +430,12 @@ export default function NotificationPreferences({preferencesTable, flash}: Props
 }
 ```
 
-### Routes
+Add routes:
 
 ```php
 // routes/web.php
+use App\Http\Controllers\NotificationPreferencesController;
+
 Route::middleware(['auth'])->group(function () {
     Route::get('/notification-preferences', [NotificationPreferencesController::class, 'show'])
         ->name('notification-preferences.show');
@@ -458,16 +444,23 @@ Route::middleware(['auth'])->group(function () {
 });
 ```
 
-### Key Advantages of the Inertia Form-Based Approach
+## How It Works
 
-1. **Simple State Management**: Uses Inertia's `useForm` - no complex React state
-2. **Type Safety**: Full TypeScript support with proper interfaces
-3. **Automatic Form Handling**: Inertia manages serialization and validation
-4. **Loading States**: Built-in `processing` state for UI feedback
-5. **Flash Messages**: Automatic success/error message handling
-6. **Progressive Enhancement**: Works even if JavaScript fails
+When you send a notification:
 
-## Usage
+```php
+$user->notify(new OrderShipped($order));
+```
+
+The package automatically:
+
+1. Checks the user's preferences for `OrderShipped` notification
+2. Filters out any channels the user has disabled
+3. Sends the notification only through enabled channels
+
+If a user has disabled email for order updates, they simply won't receive emails—no code changes needed!
+
+## Usage Examples
 
 ### Setting Individual Preferences
 
@@ -507,86 +500,9 @@ $preferences = [
 $user->updateNotificationPreferences($preferences);
 ```
 
-### Sending Notifications (Automatic Filtering)
-
-Just send notifications normally - the package automatically respects user preferences:
-
-```php
-// This will only send via channels the user has enabled
-$user->notify(new OrderShipped($order));
-```
-
-## Configuration
-
-The config file allows you to customize:
-
-```php
-return [
-    // User model to use
-    'user_model' => env('NOTIFICATION_PREFERENCES_USER_MODEL', 'App\Models\User'),
-
-    // Available notification channels
-    'default_channels' => [
-        'mail' => 'Email',
-        'database' => 'In-App',
-        'sms' => 'SMS',
-        'push' => 'Push Notifications',
-    ],
-
-    // Default state for new notifications
-    'default_enabled' => true,
-
-    // Caching settings
-    'cache' => [
-        'enabled' => true,
-        'ttl' => 3600, // 1 hour
-        'prefix' => 'notification_preferences',
-    ],
-];
-```
-
-## API Reference
-
-### User Methods (via `HasNotificationPreferences` trait)
-
-```php
-// Get a specific preference
-$user->getNotificationPreference(string $notificationType, string $channel): bool
-
-// Set a specific preference
-$user->setNotificationPreference(string $notificationType, string $channel, bool $enabled): void
-
-// Get table structure for forms
-$user->getNotificationPreferencesTable(): array
-
-// Bulk update preferences
-$user->updateNotificationPreferences(array $preferences): void
-
-// Get the relationship
-$user->notificationPreferences(): HasMany
-```
-
-### Registry Methods
-
-```php
-$registry = app(\SysMatter\NotificationPreferences\NotificationRegistry::class);
-
-// Register a notification type
-$registry->register(string $notificationClass, string $name, array $channels): void
-
-// Check if notification is registered
-$registry->isRegistered(string $notificationClass): bool
-
-// Get available channels for a notification
-$registry->getChannelsForNotification(string $notificationClass): array
-
-// Get all registered notifications
-$registry->getRegisteredNotifications(): array
-```
-
 ## Table Structure
 
-The `getNotificationPreferencesTable()` method returns data structured like this:
+The `getNotificationPreferencesTable()` method returns:
 
 ```php
 [
@@ -608,49 +524,96 @@ The `getNotificationPreferencesTable()` method returns data structured like this
 ]
 ```
 
-This structure makes it easy to build tables where:
+Perfect for building a table where:
 
-- Each row is a notification type
-- Each column is a channel
-- Each cell shows if that notification/channel combination is enabled
+- Each row = notification type
+- Each column = channel
+- Each cell = enabled/disabled toggle
+
+## Configuration
+
+Customize in `config/notification-preferences.php`:
+
+```php
+return [
+    // User model
+    'user_model' => env('NOTIFICATION_PREFERENCES_USER_MODEL', 'App\Models\User'),
+
+    // Available channels
+    'default_channels' => [
+        'mail' => 'Email',
+        'database' => 'In-App',
+        'sms' => 'SMS',
+        'push' => 'Push Notifications',
+    ],
+
+    // Default state for new notifications
+    'default_enabled' => true,
+
+    // Caching
+    'cache' => [
+        'enabled' => true,
+        'ttl' => 3600, // 1 hour
+        'prefix' => 'notification_preferences',
+    ],
+];
+```
+
+## API Reference
+
+### User Methods (via `HasNotificationPreferences` trait)
+
+```php
+// Get preference for a specific notification/channel
+$user->getNotificationPreference(string $notificationType, string $channel): bool
+
+// Set preference for a specific notification/channel
+$user->setNotificationPreference(string $notificationType, string $channel, bool $enabled): void
+
+// Get table structure for forms
+$user->getNotificationPreferencesTable(): array
+
+// Bulk update preferences
+$user->updateNotificationPreferences(array $preferences): void
+
+// Access the relationship
+$user->notificationPreferences(): HasMany
+```
+
+### Registry Methods
+
+```php
+$registry = app(NotificationRegistry::class);
+
+// Register a notification
+$registry->register(string $class, string $name, array $channels): void
+
+// Check if registered
+$registry->isRegistered(string $class): bool
+
+// Get channels for notification
+$registry->getChannelsForNotification(string $class): array
+
+// Get all registered notifications
+$registry->getRegisteredNotifications(): array
+```
 
 ## Testing
 
-Run tests with:
-
 ```bash
-composer test
+composer test              # Run all tests
+composer test-coverage     # Run with coverage
+composer analyse           # Static analysis
+composer format            # Code formatting
 ```
-
-Run tests with coverage:
-
-```bash
-composer test-coverage
-```
-
-Run static analysis:
-
-```bash
-composer analyse
-```
-
-Format code:
-
-```bash
-composer format
-```
-
-## Changelog
-
-Please see [CHANGELOG](CHANGELOG.md) for more information on what has changed recently.
 
 ## Contributing
 
 Please see [CONTRIBUTING](.github/CONTRIBUTING.md) for details.
 
-## Security Vulnerabilities
+## Security
 
-Please review [our security policy](.github/SECURITY.md) on how to report security vulnerabilities.
+Please review [our security policy](.github/SECURITY.md) for reporting vulnerabilities.
 
 ## Credits
 
