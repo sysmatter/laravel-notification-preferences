@@ -40,12 +40,22 @@ class NotificationPreferenceManager
      * @return array<int, array{
      *     notification_type: string,
      *     notification_name: string,
-     *     channels: array<string, array{name: string, enabled: bool}>
+     *     channels: array<string, array{name: string, enabled: bool}>,
+     *     group: string|null
+     * }>|array<string, array{
+     *     name: string,
+     *     description: string|null,
+     *     notifications: array<int, array{
+     *         notification_type: string,
+     *         notification_name: string,
+     *         channels: array<string, array{name: string, enabled: bool}>
+     *     }>
      * }>
      */
-    public function getPreferencesTable(Model $user): array
+    public function getPreferencesTable(Model $user, bool $grouped = false): array
     {
-        $registeredNotifications = app(NotificationRegistry::class)->getRegisteredNotifications();
+        $registry = app(NotificationRegistry::class);
+        $registeredNotifications = $registry->getRegisteredNotifications();
         $channels = config('notification-preferences.default_channels');
 
         $table = [];
@@ -57,6 +67,10 @@ class NotificationPreferenceManager
                 'channels' => [],
             ];
 
+            if (!$grouped) {
+                $row['group'] = $notificationData['group'];
+            }
+
             foreach ($notificationData['channels'] as $channel) {
                 if (isset($channels[$channel])) {
                     $row['channels'][$channel] = [
@@ -66,20 +80,41 @@ class NotificationPreferenceManager
                 }
             }
 
-            $table[] = $row;
+            if ($grouped && $notificationData['group']) {
+                $table[$notificationData['group']]['notifications'][] = $row;
+            } elseif ($grouped) {
+                $table['uncategorized']['notifications'][] = $row;
+            } else {
+                $table[] = $row;
+            }
+        }
+
+        // Add group metadata if grouped
+        if ($grouped) {
+            $registeredGroups = $registry->getRegisteredGroups();
+
+            foreach ($table as $groupKey => &$groupData) {
+                if (isset($registeredGroups[$groupKey])) {
+                    $groupData['name'] = $registeredGroups[$groupKey]['name'];
+                    $groupData['description'] = $registeredGroups[$groupKey]['description'];
+                } elseif ($groupKey === 'uncategorized') {
+                    $groupData['name'] = 'Other';
+                    $groupData['description'] = null;
+                }
+            }
         }
 
         return $table;
     }
 
     /**
-     * @param  array<string, array<string, bool>>  $preferences
+     * @param array<string, array<string, bool>> $preferences
      */
     public function updatePreferences(Model $user, array $preferences): void
     {
         foreach ($preferences as $notificationType => $channels) {
             foreach ($channels as $channel => $enabled) {
-                $this->setPreference($user, $notificationType, $channel, (bool) $enabled);
+                $this->setPreference($user, $notificationType, $channel, (bool)$enabled);
             }
         }
     }
