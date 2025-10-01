@@ -3,16 +3,15 @@
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/sysmatter/laravel-notification-preferences.svg?style=flat-square)](https://packagist.org/packages/sysmatter/laravel-notification-preferences)
 [![Total Downloads](https://img.shields.io/packagist/dt/sysmatter/laravel-notification-preferences.svg?style=flat-square)](https://packagist.org/packages/sysmatter/laravel-notification-preferences)
 [![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/sysmatter/laravel-notification-preferences/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/sysmatter/laravel-notification-preferences/actions?query=workflow%3Arun-tests+branch%3Amain)
-[![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/sysmatter/laravel-notification-preferences/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/sysmatter/laravel-notification-preferences/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain)
 
 A Laravel package that allows users to manage their notification preferences across different channels. Users can enable
 or disable specific notifications for email, SMS, push notifications, and more.
 
 ## Features
 
-- 🔧 **Seamless Integration**: Works with Laravel's built-in notification system
+- 🔧 **Seamless Integration**: Works naturally with Laravel's notification system
 - 📊 **Table-Ready Output**: Perfect for building settings forms with notification/channel grids
-- 🚀 **Automatic Filtering**: Notifications are automatically filtered based on user preferences
+- 🚀 **Automatic Filtering**: Notifications respect user preferences automatically
 - 💾 **Caching Support**: Built-in caching for performance optimization
 - 🎯 **Channel Flexibility**: Support for any notification channel (mail, SMS, push, database, etc.)
 - 🧪 **Fully Tested**: Comprehensive test suite with Pest
@@ -65,7 +64,74 @@ class User extends Authenticatable
 
 ### 2. Register Your Notifications
 
-In your `AppServiceProvider`:
+#### Option A: Using Static Metadata (Recommended)
+
+Define metadata directly in your notification classes:
+
+```php
+<?php
+
+namespace App\Notifications;
+
+use SysMatter\NotificationPreferences\PreferenceAwareNotification;
+
+class OrderShipped extends PreferenceAwareNotification
+{
+    public static function notificationMeta(): array
+    {
+        return [
+            'name' => 'Order Updates',
+            'channels' => ['mail', 'database', 'sms'],
+            'group' => 'orders', // Optional: for organizing in UI
+        ];
+    }
+
+    public function toMail($notifiable)
+    {
+        // Your mail notification logic
+    }
+
+    public function toArray($notifiable)
+    {
+        // Your database notification logic
+    }
+}
+```
+
+Then register them in your `AppServiceProvider`:
+
+```php
+<?php
+
+namespace App\Providers;
+
+use Illuminate\Support\ServiceProvider;
+use SysMatter\NotificationPreferences\NotificationRegistry;
+use App\Notifications\OrderShipped;
+use App\Notifications\PaymentReceived;
+
+class AppServiceProvider extends ServiceProvider
+{
+    public function boot(): void
+    {
+        $registry = app(NotificationRegistry::class);
+        
+        // Optional: Register groups for better organization
+        $registry->registerGroup('orders', 'Orders & Shipping', 'Notifications about your orders');
+        $registry->registerGroup('account', 'Account & Security');
+        
+        // Register notifications - metadata is pulled from notificationMeta()
+        $registry->registerFromMeta([
+            OrderShipped::class,
+            PaymentReceived::class,
+        ]);
+    }
+}
+```
+
+#### Option B: Manual Registration
+
+If you prefer explicit control:
 
 ```php
 <?php
@@ -86,7 +152,8 @@ class AppServiceProvider extends ServiceProvider
         $registry->register(
             OrderShipped::class,
             'Order Updates',
-            ['mail', 'database', 'sms']
+            ['mail', 'database', 'sms'],
+            'orders' // Optional group
         );
         
         $registry->register(
@@ -100,9 +167,7 @@ class AppServiceProvider extends ServiceProvider
 
 ### 3. Make Notifications Preference-Aware
 
-You have two options:
-
-#### Option A: Extend the Base Class (Recommended)
+Extend the `PreferenceAwareNotification` base class:
 
 ```php
 <?php
@@ -113,12 +178,14 @@ use SysMatter\NotificationPreferences\PreferenceAwareNotification;
 
 class OrderShipped extends PreferenceAwareNotification
 {
-    // That's it! By default uses all channels from config
-    
-    // Optional: Override to customize channels for this notification
-    protected function getOriginalChannels($notifiable): array
+    // Define metadata for registration
+    public static function notificationMeta(): array
     {
-        return ['mail', 'database', 'sms'];
+        return [
+            'name' => 'Order Updates',
+            'channels' => ['mail', 'database', 'sms'],
+            'group' => 'orders', // Optional
+        ];
     }
 
     public function toMail($notifiable)
@@ -133,7 +200,7 @@ class OrderShipped extends PreferenceAwareNotification
 }
 ```
 
-#### Option B: Use the Trait
+**Alternative**: If you can't extend the base class, use the trait:
 
 ```php
 <?php
@@ -152,15 +219,7 @@ class OrderShipped extends Notification
         return ['mail', 'database', 'sms'];
     }
 
-    public function toMail($notifiable)
-    {
-        // Your mail notification logic
-    }
-
-    public function toArray($notifiable)
-    {
-        // Your database notification logic
-    }
+    // ... rest of your notification
 }
 ```
 
@@ -181,9 +240,13 @@ class NotificationPreferencesController extends Controller
 {
     public function show(Request $request)
     {
-        $preferencesTable = $request->user()->getNotificationPreferencesTable();
+        // Get flat table
+        $preferences = $request->user()->getNotificationPreferences();
+        
+        // Or get grouped table
+        $groupedPreferences = $request->user()->getNotificationPreferences(grouped: true);
 
-        return view('notification-preferences', compact('preferencesTable'));
+        return view('notification-preferences', compact('preferences'));
     }
 
     public function update(Request $request)
@@ -201,7 +264,7 @@ class NotificationPreferencesController extends Controller
 }
 ```
 
-Create a view:
+**Flat Table View:**
 
 ```blade
 <form method="POST" action="{{ route('notification-preferences.update') }}">
@@ -212,7 +275,7 @@ Create a view:
             <tr>
                 <th>Notification</th>
                 @php
-                    $channels = collect($preferencesTable)->first()['channels'] ?? [];
+                    $channels = collect($preferences)->first()['channels'] ?? [];
                 @endphp
                 @foreach($channels as $channel => $data)
                     <th>{{ $data['name'] }}</th>
@@ -220,7 +283,7 @@ Create a view:
             </tr>
         </thead>
         <tbody>
-            @foreach($preferencesTable as $notification)
+            @foreach($preferences as $notification)
                 <tr>
                     <td>{{ $notification['notification_name'] }}</td>
                     @foreach($notification['channels'] as $channel => $channelData)
@@ -237,6 +300,56 @@ Create a view:
             @endforeach
         </tbody>
     </table>
+    
+    <button type="submit">Save Preferences</button>
+</form>
+```
+
+**Grouped Table View:**
+
+```blade
+<form method="POST" action="{{ route('notification-preferences.update') }}">
+    @csrf
+    
+    @foreach($groupedPreferences as $groupKey => $group)
+        <div class="notification-group">
+            <h2>{{ $group['name'] }}</h2>
+            @if($group['description'])
+                <p>{{ $group['description'] }}</p>
+            @endif
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Notification</th>
+                        @php
+                            $channels = collect($group['notifications'])->first()['channels'] ?? [];
+                        @endphp
+                        @foreach($channels as $channel => $data)
+                            <th>{{ $data['name'] }}</th>
+                        @endforeach
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($group['notifications'] as $notification)
+                        <tr>
+                            <td>{{ $notification['notification_name'] }}</td>
+                            @foreach($notification['channels'] as $channel => $channelData)
+                                <td>
+                                    <input 
+                                        type="checkbox" 
+                                        name="preferences[{{ $notification['notification_type'] }}][{{ $channel }}]"
+                                        value="1"
+                                        {{ $channelData['enabled'] ? 'checked' : '' }}
+                                    >
+                                </td>
+                            @endforeach
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    @endforeach
     
     <button type="submit">Save Preferences</button>
 </form>
@@ -260,7 +373,9 @@ class NotificationPreferencesController extends Controller
     public function show(Request $request): Response
     {
         return Inertia::render('NotificationPreferences', [
-            'preferencesTable' => $request->user()->getNotificationPreferencesTable(),
+            'preferences' => $request->user()->getNotificationPreferences(),
+            // Or use grouped version:
+            // 'preferences' => $request->user()->getNotificationPreferences(grouped: true),
         ]);
     }
 
@@ -279,7 +394,7 @@ class NotificationPreferencesController extends Controller
 }
 ```
 
-Create a React component:
+**Flat Table React Component:**
 
 ```tsx
 // resources/js/Pages/NotificationPreferences.tsx
@@ -295,20 +410,21 @@ interface NotificationRow {
     notification_type: string;
     notification_name: string;
     channels: Record<string, Channel>;
+    group: string | null;
 }
 
 interface Props {
-    preferencesTable: NotificationRow[];
+    preferences: NotificationRow[];
     flash?: {
         success?: string;
     };
 }
 
-export default function NotificationPreferences({preferencesTable, flash}: Props) {
+export default function NotificationPreferences({preferences, flash}: Props) {
     // Initialize form with current preferences
     const {data, setData, post, processing} = useForm({
         preferences: Object.fromEntries(
-            preferencesTable.map(notification => [
+            preferences.map(notification => [
                 notification.notification_type,
                 Object.fromEntries(
                     Object.entries(notification.channels).map(([channel, channelData]) => [
@@ -337,11 +453,11 @@ export default function NotificationPreferences({preferencesTable, flash}: Props
 
     // Get all unique channels for table headers
     const allChannels = Array.from(new Set(
-        preferencesTable.flatMap(n => Object.keys(n.channels))
+        preferences.flatMap(n => Object.keys(n.channels))
     ));
 
     const getChannelName = (channel: string): string => {
-        const firstNotificationWithChannel = preferencesTable.find(n => n.channels[channel]);
+        const firstNotificationWithChannel = preferences.find(n => n.channels[channel]);
         return firstNotificationWithChannel?.channels[channel]?.name || channel;
     };
 
@@ -379,7 +495,7 @@ export default function NotificationPreferences({preferencesTable, flash}: Props
                                 </thead>
 
                                 <tbody className="bg-white divide-y divide-gray-200">
-                                {preferencesTable.map(notification => (
+                                {preferences.map(notification => (
                                     <tr key={notification.notification_type} className="hover:bg-gray-50">
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                                             {notification.notification_name}
@@ -424,6 +540,178 @@ export default function NotificationPreferences({preferencesTable, flash}: Props
                         </div>
                     </form>
                 </div>
+            </div>
+        </>
+    );
+}
+```
+
+**Grouped Table React Component:**
+
+```tsx
+// resources/js/Pages/NotificationPreferencesGrouped.tsx
+import React from 'react';
+import {Head, useForm} from '@inertiajs/react';
+
+interface Channel {
+    name: string;
+    enabled: boolean;
+}
+
+interface NotificationRow {
+    notification_type: string;
+    notification_name: string;
+    channels: Record<string, Channel>;
+}
+
+interface NotificationGroup {
+    name: string;
+    description: string | null;
+    notifications: NotificationRow[];
+}
+
+interface Props {
+    preferences: Record<string, NotificationGroup>;
+    flash?: {
+        success?: string;
+    };
+}
+
+export default function NotificationPreferencesGrouped({preferences, flash}: Props) {
+    // Flatten grouped structure for form data
+    const allNotifications = Object.values(preferences).flatMap(group => group.notifications);
+
+    const {data, setData, post, processing} = useForm({
+        preferences: Object.fromEntries(
+            allNotifications.map(notification => [
+                notification.notification_type,
+                Object.fromEntries(
+                    Object.entries(notification.channels).map(([channel, channelData]) => [
+                        channel,
+                        channelData.enabled
+                    ])
+                )
+            ])
+        )
+    });
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        post(route('notification-preferences.update'));
+    };
+
+    const updatePreference = (notificationType: string, channel: string, enabled: boolean) => {
+        setData('preferences', {
+            ...data.preferences,
+            [notificationType]: {
+                ...data.preferences[notificationType],
+                [channel]: enabled
+            }
+        });
+    };
+
+    const getAllChannels = (notifications: NotificationRow[]): string[] => {
+        return Array.from(new Set(notifications.flatMap(n => Object.keys(n.channels))));
+    };
+
+    const getChannelName = (notifications: NotificationRow[], channel: string): string => {
+        const notification = notifications.find(n => n.channels[channel]);
+        return notification?.channels[channel]?.name || channel;
+    };
+
+    return (
+        <>
+            <Head title="Notification Preferences"/>
+
+            <div className="max-w-6xl mx-auto py-8 px-4">
+                {flash?.success && (
+                    <div className="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded">
+                        {flash.success}
+                    </div>
+                )}
+
+                <h1 className="text-2xl font-bold mb-6">Notification Preferences</h1>
+
+                <form onSubmit={handleSubmit} className="space-y-8">
+                    {Object.entries(preferences).map(([groupKey, group]) => {
+                        const channels = getAllChannels(group.notifications);
+
+                        return (
+                            <div key={groupKey} className="bg-white shadow rounded-lg overflow-hidden">
+                                <div className="px-6 py-4 border-b border-gray-200">
+                                    <h2 className="text-lg font-semibold text-gray-900">{group.name}</h2>
+                                    {group.description && (
+                                        <p className="mt-1 text-sm text-gray-600">{group.description}</p>
+                                    )}
+                                </div>
+
+                                <div className="overflow-x-auto">
+                                    <table className="w-full">
+                                        <thead className="bg-gray-50">
+                                        <tr>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                Notification
+                                            </th>
+                                            {channels.map(channel => (
+                                                <th
+                                                    key={channel}
+                                                    className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                                >
+                                                    {getChannelName(group.notifications, channel)}
+                                                </th>
+                                            ))}
+                                        </tr>
+                                        </thead>
+
+                                        <tbody className="bg-white divide-y divide-gray-200">
+                                        {group.notifications.map(notification => (
+                                            <tr key={notification.notification_type} className="hover:bg-gray-50">
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                                    {notification.notification_name}
+                                                </td>
+
+                                                {channels.map(channel => {
+                                                    const channelData = notification.channels[channel];
+
+                                                    return (
+                                                        <td key={channel}
+                                                            className="px-6 py-4 whitespace-nowrap text-center">
+                                                            {channelData ? (
+                                                                <input
+                                                                    type="checkbox"
+                                                                    checked={data.preferences[notification.notification_type]?.[channel] || false}
+                                                                    onChange={(e) => updatePreference(
+                                                                        notification.notification_type,
+                                                                        channel,
+                                                                        e.target.checked
+                                                                    )}
+                                                                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                                                                />
+                                                            ) : (
+                                                                <span className="text-gray-400">—</span>
+                                                            )}
+                                                        </td>
+                                                    );
+                                                })}
+                                            </tr>
+                                        ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        );
+                    })}
+
+                    <div className="flex justify-end">
+                        <button
+                            type="submit"
+                            disabled={processing}
+                            className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50"
+                        >
+                            {processing ? 'Saving...' : 'Save Preferences'}
+                        </button>
+                    </div>
+                </form>
             </div>
         </>
     );
@@ -479,7 +767,7 @@ $user->setNotificationPreference(PaymentReceived::class, 'sms', true);
 $wantsEmail = $user->getNotificationPreference(OrderShipped::class, 'mail');
 
 // Get the full table structure for building forms
-$preferencesTable = $user->getNotificationPreferencesTable();
+$preferences = $user->getNotificationPreferences();
 ```
 
 ### Bulk Updates
@@ -502,7 +790,7 @@ $user->updateNotificationPreferences($preferences);
 
 ## Table Structure
 
-The `getNotificationPreferencesTable()` method returns:
+The `getNotificationPreferences()` method returns:
 
 ```php
 [
@@ -571,7 +859,7 @@ $user->getNotificationPreference(string $notificationType, string $channel): boo
 $user->setNotificationPreference(string $notificationType, string $channel, bool $enabled): void
 
 // Get table structure for forms
-$user->getNotificationPreferencesTable(): array
+$user->getNotificationPreferences(): array
 
 // Bulk update preferences
 $user->updateNotificationPreferences(array $preferences): void

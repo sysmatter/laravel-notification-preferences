@@ -26,20 +26,32 @@ trait HasNotificationPreferences
     }
 
     /**
+     * Get notification preferences table for building forms.
+     *
+     * @param bool $grouped Whether to group notifications by their group
      * @return array<int, array{
      *     notification_type: string,
      *     notification_name: string,
-     *     channels: array<string, array{name: string, enabled: bool}>
+     *     channels: array<string, array{name: string, enabled: bool}>,
+     *     group: string|null
+     * }>|array<string, array{
+     *     name: string,
+     *     description: string|null,
+     *     notifications: array<int, array{
+     *         notification_type: string,
+     *         notification_name: string,
+     *         channels: array<string, array{name: string, enabled: bool}>
+     *     }>
      * }>
      */
-    public function getNotificationPreferencesTable(): array
+    public function getNotificationPreferences(bool $grouped = false): array
     {
         return app(NotificationPreferenceManager::class)
-            ->getPreferencesTable($this);
+            ->getPreferencesTable($this, $grouped);
     }
 
     /**
-     * @param  array<string, array<string, bool>>  $preferences
+     * @param array<string, array<string, bool>> $preferences
      */
     public function updateNotificationPreferences(array $preferences): void
     {

@@ -2,16 +2,17 @@
 
 namespace SysMatter\NotificationPreferences\Tests\Fixtures;
 
-use Illuminate\Notifications\Notification;
-use SysMatter\NotificationPreferences\Traits\HasPreferenceAwareNotifications;
+use SysMatter\NotificationPreferences\PreferenceAwareNotification;
 
-class FilteredNotification extends Notification
+class FilteredNotification extends PreferenceAwareNotification
 {
-    use HasPreferenceAwareNotifications;
-
-    protected function getOriginalChannels($notifiable): array
+    public static function notificationMeta(): array
     {
-        return ['mail', 'database'];
+        return [
+            'name' => 'Filtered Test Notification',
+            'channels' => ['mail', 'database'],
+            'group' => null,
+        ];
     }
 
     public function toMail($notifiable): array

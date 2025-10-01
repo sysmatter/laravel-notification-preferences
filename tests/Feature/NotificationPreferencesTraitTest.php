@@ -36,7 +36,7 @@ test('user can get preferences table', function () {
     $registry = app(NotificationRegistry::class);
     $registry->register('TestNotification', 'Test Notification', ['mail', 'sms']);
 
-    $table = $this->user->getNotificationPreferencesTable();
+    $table = $this->user->getNotificationPreferences();
 
     expect($table)->toBeArray();
     expect($table)->toHaveCount(1);
