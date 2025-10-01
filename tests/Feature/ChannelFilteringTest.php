@@ -71,7 +71,7 @@ test('notification respects mixed preferences across channels', function () {
 });
 
 test('notification works with notifiable without preference method', function () {
-    $user = new class {
+    $user = new class () {
         // No getNotificationPreference method
     };
 
