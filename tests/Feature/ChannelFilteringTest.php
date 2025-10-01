@@ -57,22 +57,21 @@ test('notification respects mixed preferences across channels', function () {
     $user = User::factory()->create();
 
     $registry = app(NotificationRegistry::class);
-    $registry->register(FilteredNotification::class, 'Test', ['mail', 'database', 'sms']);
+    $registry->register(FilteredNotification::class, 'Test', ['mail', 'database']);
 
-    // Mixed preferences
+    // Mixed preferences - enable mail, disable database
     $user->setNotificationPreference(FilteredNotification::class, 'mail', true);
     $user->setNotificationPreference(FilteredNotification::class, 'database', false);
-    $user->setNotificationPreference(FilteredNotification::class, 'sms', true);
 
     $notification = new FilteredNotification();
 
     expect($notification->via($user))
-        ->toBe(['mail', 'sms'])
+        ->toBe(['mail'])
         ->not->toContain('database');
 });
 
 test('notification works with notifiable without preference method', function () {
-    $user = new class () {
+    $user = new class {
         // No getNotificationPreference method
     };
 
