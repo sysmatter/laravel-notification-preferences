@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.0.0-alpha - 2025-10-01
+
+- Merge pull request #9 from sysmatter/refactor-2025-09-30-2 (732c7e3)
+- feat: add groups, cleaner registration (aa19237)
+- chore: update CHANGELOG for v0.1.6-alpha (ad4e5f7)
+
 ## v0.1.6-alpha - 2025-10-01
 
 - Merge pull request #8 from sysmatter/refactor-2025-09-30 (c2347df)
