@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.1.6-alpha - 2025-10-01
+
+- Merge pull request #8 from sysmatter/refactor-2025-09-30 (c2347df)
+- Fix styling (f934c79)
+- fix: notification respects mixed preferences across channels test (29133cb)
+- refactor: remove unused PreferenceAwareChannelManager, update tests (a647c6d)
+- chore: update CHANGELOG for v1.2.0 (6fc139b)
+
 ## v1.2.0 - 2025-09-30
 
 - Merge pull request #7 from sysmatter/add-notification-abstract (5c8b667)
