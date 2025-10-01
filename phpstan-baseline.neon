@@ -19,12 +19,6 @@ parameters:
 			path: src/NotificationPreferenceManager.php
 
 		-
-			message: '#^Access to an undefined property Illuminate\\Notifications\\Notification\:\:\$preferenceFilteredChannels\.$#'
-			identifier: property.notFound
-			count: 1
-			path: src/PreferenceAwareChannelManager.php
-
-		-
 			message: '#^Trait SysMatter\\NotificationPreferences\\Traits\\HasNotificationPreferences is used zero times and is not analysed\.$#'
 			identifier: trait.unused
 			count: 1
