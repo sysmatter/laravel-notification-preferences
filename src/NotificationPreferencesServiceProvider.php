@@ -5,6 +5,7 @@ namespace SysMatter\NotificationPreferences;
 use Illuminate\Notifications\Events\NotificationSending;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
+use SysMatter\NotificationPreferences\Console\UninstallCommand;
 
 class NotificationPreferencesServiceProvider extends ServiceProvider
 {
@@ -29,12 +30,41 @@ class NotificationPreferencesServiceProvider extends ServiceProvider
             __DIR__ . '/../database/migrations/create_notification_preferences_table.php' => database_path('migrations/' . date('Y_m_d_His') . '_create_notification_preferences_table.php'),
         ], 'notification-preferences-migrations');
 
-        $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
+        // Only load migrations if they haven't been published
+        if (!$this->migrationsHaveBeenPublished()) {
+            $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
+        }
 
         // Register automatic channel filtering
         Event::listen(
             NotificationSending::class,
             [NotificationChannelFilter::class, 'handle']
         );
+
+        // Register commands
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                UninstallCommand::class,
+            ]);
+        }
+    }
+
+    protected function migrationsHaveBeenPublished(): bool
+    {
+        $publishedPath = database_path('migrations');
+        $migrationFile = 'create_notification_preferences_table.php';
+
+        if (!is_dir($publishedPath)) {
+            return false;
+        }
+
+        $files = scandir($publishedPath);
+        foreach ($files as $file) {
+            if (str_contains($file, $migrationFile)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
