@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.1](https://github.com/sysmatter/laravel-notification-preferences/compare/v1.1.0...v1.1.1) (2025-10-15)
+
+
+### Miscellaneous Chores
+
+* fix react/inertia example ([#4](https://github.com/sysmatter/laravel-notification-preferences/issues/4)) ([e2fd69d](https://github.com/sysmatter/laravel-notification-preferences/commit/e2fd69d5f822af5e9e9fff8a78b897ffbca06832))
+
 ## [1.1.0](https://github.com/sysmatter/laravel-notification-preferences/compare/v1.0.0...v1.1.0) (2025-10-15)
 
 
