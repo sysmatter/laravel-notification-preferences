@@ -1,0 +1,71 @@
+{
+    "name": "sysmatter/laravel-notification-preferences",
+    "description": "Manage and display user notification preferences in Laravel",
+    "type": "library",
+    "license": "MIT",
+    "homepage": "https://github.com/sysmatter/laravel-notification-preferences",
+    "keywords": [
+        "laravel",
+        "notification",
+        "preferences"
+    ],
+    "authors": [
+        {
+            "name": "Shavonn Brown",
+            "email": "shavonn@sysmatter.com",
+            "role": "Developer"
+        }
+    ],
+    "scripts": {
+        "test": "pest",
+        "test-coverage": "pest --coverage",
+        "test-unit": "pest tests/Unit",
+        "test-feature": "pest tests/Feature",
+        "analyse": "php -d memory_limit=512M vendor/bin/phpstan analyse -c phpstan.neon --memory-limit=512M",
+        "analyse-baseline": "php -d memory_limit=512M vendor/bin/phpstan analyse -c phpstan.neon --generate-baseline --memory-limit=512M",
+        "pint": "vendor/bin/pint ./src ./tests ./config"
+    },
+    "require": {
+        "php": "^8.2",
+        "illuminate/support": "^11.0|^12.0",
+        "illuminate/notifications": "^11.0|^12.0",
+        "illuminate/database": "^11.0|^12.0"
+    },
+    "require-dev": {
+        "larastan/larastan": "*",
+        "laravel/pint": "*",
+        "orchestra/testbench": "^9.0|^10.0",
+        "pestphp/pest": "^2.0|^3.0",
+        "pestphp/pest-plugin-laravel": "^2.0|^3.0",
+        "phpstan/extension-installer": "^1.4",
+        "phpstan/phpstan": "^2.1",
+        "phpstan/phpstan-phpunit": "^2.0",
+        "phpunit/phpunit": "^11.5",
+        "captainhook/captainhook": "^5.25",
+        "captainhook/plugin-composer": "^5.3"
+    },
+    "autoload": {
+        "psr-4": {
+            "SysMatter\\NotificationPreferences\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "SysMatter\\NotificationPreferences\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "SysMatter\\NotificationPreferences\\NotificationPreferencesServiceProvider"
+            ]
+        }
+    },
+    "config": {
+        "allow-plugins": {
+            "pestphp/pest-plugin": true,
+            "phpstan/extension-installer": true,
+            "captainhook/plugin-composer": true
+        }
+    }
+}

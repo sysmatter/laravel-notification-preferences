@@ -1,0 +1,6 @@
+parameters:
+    ignoreErrors:
+        # Traits are meant to be used by consumers of the package
+        - '#Trait .* is used zero times and is not analysed#'
+        # Config array keys are optional in practice
+        - '#Offset .* on .* on left side of \?\? always exists and is not nullable#'
