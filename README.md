@@ -32,9 +32,6 @@ and a structured table output for display.
 composer require sysmatter/laravel-notification-preferences
 ```
 
-**Important:** After installation, update the namespace in all package files from `SysMatter` to your actual vendor
-name, or use this package as-is if you're the package author.
-
 Publish the config and migrations:
 
 ```bash
