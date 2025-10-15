@@ -303,13 +303,17 @@ export default function NotificationPreferences({preferences}: Props) {
     });
 
     const handleToggle = (notificationType: string, channel: string, currentValue: boolean) => {
-        useForm({
-            notification_type: notificationType,
-            channel,
-            enabled: !currentValue,
-        }).put('/settings/notifications', {
-            preserveScroll: true,
-        });
+        router.put(
+            notificationPreferenceController.update.url(),
+            {
+                notification_type: notificationType,
+                channel,
+                enabled: !currentValue,
+            },
+            {
+                preserveScroll: true,
+            },
+        );
     };
 
     return (
