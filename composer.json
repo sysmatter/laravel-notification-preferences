@@ -40,7 +40,7 @@
         "phpstan/extension-installer": "^1.4",
         "phpstan/phpstan": "^2.1",
         "phpstan/phpstan-phpunit": "^2.0",
-        "phpunit/phpunit": "^11.5",
+        "phpunit/phpunit": "^10|^11.5",
         "captainhook/captainhook": "^5.25",
         "captainhook/plugin-composer": "^5.3"
     },
