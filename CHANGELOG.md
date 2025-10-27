@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/sysmatter/laravel-notification-preferences/compare/v1.1.2...v1.2.0) (2025-10-27)
+
+
+### Features
+
+* bulk update preferences ([#9](https://github.com/sysmatter/laravel-notification-preferences/issues/9)) ([b6f14a9](https://github.com/sysmatter/laravel-notification-preferences/commit/b6f14a9bbf12cb9170d797a80f48a6ff6d818015))
+
 ## [1.1.2](https://github.com/sysmatter/laravel-notification-preferences/compare/v1.1.1...v1.1.2) (2025-10-27)
 
 
