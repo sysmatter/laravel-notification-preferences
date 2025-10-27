@@ -189,6 +189,208 @@ $preferences = $user->getNotificationPreferences();
 $table = $user->getNotificationPreferencesTable();
 ```
 
+## Bulk Update Operations
+
+The package provides convenient methods for bulk updating notification preferences, making it easy to implement "disable
+all emails" or "turn off marketing" features.
+
+### Available Bulk Methods
+
+#### Disable/Enable All Notifications in a Group for a Channel
+
+Turn off all marketing emails:
+
+```php
+$user->setGroupChannelPreference('marketing', 'mail', false);
+```
+
+Turn on all system notifications for in-app:
+
+```php
+$user->setGroupChannelPreference('system', 'database', true);
+```
+
+#### Disable/Enable a Channel Across All Notifications
+
+Turn off all email notifications:
+
+```php
+$user->setChannelPreferenceForAll('mail', false);
+```
+
+Enable push notifications for everything:
+
+```php
+$user->setChannelPreferenceForAll('broadcast', true);
+```
+
+#### Disable/Enable All Channels for a Notification Type
+
+Turn off all channels for a specific notification:
+
+```php
+$user->setAllChannelsForNotification(OrderShipped::class, false);
+```
+
+Enable all channels for security alerts:
+
+```php
+$user->setAllChannelsForNotification(SecurityAlert::class, true);
+```
+
+### Return Values
+
+All bulk methods return the **count of preferences updated**:
+
+```php
+$count = $user->setChannelPreferenceForAll('mail', false);
+// Returns: 15 (updated 15 notification preferences)
+```
+
+This is useful for providing user feedback:
+
+```php
+$count = $user->setGroupChannelPreference('marketing', 'mail', false);
+
+return response()->json([
+    'message' => "Disabled email for {$count} marketing notifications"
+]);
+```
+
+### Forced Channels are Skipped
+
+Bulk operations automatically skip forced channels:
+
+```php
+'notifications' => [
+    SecurityAlert::class => [
+        'group' => 'security',
+        'label' => 'Security Alerts',
+        'force_channels' => ['mail'], // Always send emails
+    ],
+],
+```
+
+```php
+// This will NOT disable email for SecurityAlert
+$user->setChannelPreferenceForAll('mail', false);
+```
+
+### UI Implementation Examples
+
+#### "Disable All Emails" Button
+
+```php
+public function disableAllEmails(Request $request)
+{
+    $count = $request->user()->setChannelPreferenceForAll('mail', false);
+    
+    return back()->with('success', "Disabled email notifications for {$count} notification types");
+}
+```
+
+#### "Mute Marketing" Toggle
+
+```php
+public function toggleMarketing(Request $request)
+{
+    $enabled = $request->boolean('enabled');
+    $count = $request->user()->setGroupChannelPreference('marketing', 'mail', $enabled);
+    
+    $action = $enabled ? 'enabled' : 'disabled';
+    
+    return back()->with('success', "Marketing emails {$action}");
+}
+```
+
+#### "Notification Type Master Toggle"
+
+```php
+public function toggleNotificationType(Request $request, string $notificationType)
+{
+    $enabled = $request->boolean('enabled');
+    $count = $request->user()->setAllChannelsForNotification($notificationType, $enabled);
+    
+    return response()->json([
+        'updated' => $count,
+        'enabled' => $enabled
+    ]);
+}
+```
+
+### Direct Manager Access
+
+You can also use the manager directly:
+
+```php
+use SysMatter\NotificationPreferences\NotificationPreferenceManager;
+
+$manager = app(NotificationPreferenceManager::class);
+
+// Same methods available
+$count = $manager->setGroupPreference($user, 'marketing', 'mail', false);
+$count = $manager->setChannelPreference($user, 'mail', false);
+$count = $manager->setNotificationPreference($user, OrderShipped::class, false);
+```
+
+### Building a Preferences UI
+
+Here's a complete example of a preferences page controller:
+
+```php
+public function index(Request $request)
+{
+    $user = $request->user();
+    
+    return view('preferences.notifications', [
+        'preferences' => $user->getNotificationPreferencesTable(),
+        'channels' => config('notification-preferences.channels'),
+    ]);
+}
+
+public function update(Request $request)
+{
+    $user = $request->user();
+    
+    $validated = $request->validate([
+        'action' => 'required|in:single,group,channel,notification',
+        'notification_type' => 'required_if:action,single,notification',
+        'channel' => 'required_if:action,single,group,channel',
+        'group' => 'required_if:action,group',
+        'enabled' => 'required|boolean',
+    ]);
+    
+    $count = match($validated['action']) {
+        'single' => $user->setNotificationPreference(
+            $validated['notification_type'],
+            $validated['channel'],
+            $validated['enabled']
+        ) ? 1 : 0,
+        
+        'group' => $user->setGroupChannelPreference(
+            $validated['group'],
+            $validated['channel'],
+            $validated['enabled']
+        ),
+        
+        'channel' => $user->setChannelPreferenceForAll(
+            $validated['channel'],
+            $validated['enabled']
+        ),
+        
+        'notification' => $user->setAllChannelsForNotification(
+            $validated['notification_type'],
+            $validated['enabled']
+        ),
+    };
+    
+    return response()->json([
+        'success' => true,
+        'count' => $count,
+    ]);
+}
+```
+
 ### Table Structure Output
 
 The `getNotificationPreferencesTable()` method returns data structured for easy UI rendering:

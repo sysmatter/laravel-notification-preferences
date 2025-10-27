@@ -278,4 +278,95 @@ class NotificationPreferenceManager
     {
         return $user->getAuthIdentifier();
     }
+
+    /**
+     * Set preference for all notifications in a group
+     */
+    public function setGroupPreference(
+        Authenticatable $user,
+        string          $groupKey,
+        string          $channel,
+        bool            $enabled
+    ): int {
+        $config = $this->getConfig();
+
+        /** @var array<string, array{group?: string, force_channels?: array<int, string>}> $notifications */
+        $notifications = $config['notifications'] ?? [];
+
+        $notificationsInGroup = collect($notifications)
+            ->filter(fn ($config) => ($config['group'] ?? null) === $groupKey)
+            ->keys();
+
+        $count = 0;
+        foreach ($notificationsInGroup as $notificationType) {
+            // Skip if this channel is forced for this notification
+            $forcedChannels = $notifications[$notificationType]['force_channels'] ?? [];
+            if (in_array($channel, $forcedChannels, true)) {
+                continue;
+            }
+
+            $this->setPreference($user, $notificationType, $channel, $enabled);
+            $count++;
+        }
+
+        return $count;
+    }
+
+    /**
+     * Set preference for a channel across all notifications
+     */
+    public function setChannelPreference(
+        Authenticatable $user,
+        string          $channel,
+        bool            $enabled
+    ): int {
+        $config = $this->getConfig();
+
+        /** @var array<string, array{force_channels?: array<int, string>}> $notifications */
+        $notifications = $config['notifications'] ?? [];
+
+        $count = 0;
+        foreach ($notifications as $notificationType => $notificationConfig) {
+            // Skip if this channel is forced for this notification
+            $forcedChannels = $notificationConfig['force_channels'] ?? [];
+            if (in_array($channel, $forcedChannels, true)) {
+                continue;
+            }
+
+            $this->setPreference($user, $notificationType, $channel, $enabled);
+            $count++;
+        }
+
+        return $count;
+    }
+
+    /**
+     * Set preference for all channels of a notification type
+     */
+    public function setNotificationPreference(
+        Authenticatable $user,
+        string          $notificationType,
+        bool            $enabled
+    ): int {
+        $config = $this->getConfig();
+        $channels = array_keys($this->getEnabledChannels());
+
+        /** @var array<string, array{force_channels?: array<int, string>}> $notifications */
+        $notifications = $config['notifications'] ?? [];
+
+        $forcedChannels = $notifications[$notificationType]['force_channels'] ?? [];
+
+        $count = 0;
+        foreach ($channels as $channel) {
+            // Skip if this channel is forced for this notification
+            if (in_array($channel, $forcedChannels, true)) {
+                continue;
+            }
+
+            $this->setPreference($user, $notificationType, $channel, $enabled);
+            $count++;
+        }
+
+        return $count;
+    }
 }
