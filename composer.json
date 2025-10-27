@@ -34,7 +34,7 @@
     "require-dev": {
         "larastan/larastan": "*",
         "laravel/pint": "*",
-        "orchestra/testbench": "^9.0|^10.0",
+        "orchestra/testbench": "^9.5|^10.0",
         "pestphp/pest": "^2.0|^3.0",
         "pestphp/pest-plugin-laravel": "^2.0|^3.0",
         "phpstan/extension-installer": "^1.4",
