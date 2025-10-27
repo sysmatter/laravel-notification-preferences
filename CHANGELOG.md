@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.1](https://github.com/sysmatter/laravel-notification-preferences/compare/v1.2.0...v1.2.1) (2025-10-27)
+
+
+### Bug Fixes
+
+* remove load migrations so it doesn't cause issues ([#11](https://github.com/sysmatter/laravel-notification-preferences/issues/11)) ([5cc56e5](https://github.com/sysmatter/laravel-notification-preferences/commit/5cc56e52fb97dc69ff25205bb1a52e4aecb91224))
+
 ## [1.2.0](https://github.com/sysmatter/laravel-notification-preferences/compare/v1.1.2...v1.2.0) (2025-10-27)
 
 
