@@ -30,11 +30,6 @@ class NotificationPreferencesServiceProvider extends ServiceProvider
             __DIR__ . '/../database/migrations/create_notification_preferences_table.php' => database_path('migrations/' . date('Y_m_d_His') . '_create_notification_preferences_table.php'),
         ], 'notification-preferences-migrations');
 
-        // Only load migrations if they haven't been published
-        if (!$this->migrationsHaveBeenPublished()) {
-            $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
-        }
-
         // Register automatic channel filtering
         Event::listen(
             NotificationSending::class,
@@ -47,26 +42,5 @@ class NotificationPreferencesServiceProvider extends ServiceProvider
                 UninstallCommand::class,
             ]);
         }
-    }
-
-    protected static function migrationsHaveBeenPublished(): bool
-    {
-        $migrationFile = 'create_notification_preferences_table.php';
-        $migrator = app('migrator');
-
-        foreach ($migrator->paths() as $path) {
-            if (!is_dir($path)) {
-                continue;
-            }
-
-            $files = scandir($path);
-            foreach ($files as $file) {
-                if (str_contains($file, $migrationFile)) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
     }
 }
