@@ -39,4 +39,22 @@ trait HasNotificationPreferences
         return app(NotificationPreferenceManager::class)
             ->getPreferencesTable($this);
     }
+
+    public function setGroupChannelPreference(string $groupKey, string $channel, bool $enabled): int
+    {
+        return app(NotificationPreferenceManager::class)
+            ->setGroupPreference($this, $groupKey, $channel, $enabled);
+    }
+
+    public function setChannelPreferenceForAll(string $channel, bool $enabled): int
+    {
+        return app(NotificationPreferenceManager::class)
+            ->setChannelPreference($this, $channel, $enabled);
+    }
+
+    public function setAllChannelsForNotification(string $notificationType, bool $enabled): int
+    {
+        return app(NotificationPreferenceManager::class)
+            ->setNotificationPreference($this, $notificationType, $enabled);
+    }
 }
