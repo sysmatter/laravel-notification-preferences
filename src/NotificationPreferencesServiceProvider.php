@@ -49,19 +49,21 @@ class NotificationPreferencesServiceProvider extends ServiceProvider
         }
     }
 
-    protected function migrationsHaveBeenPublished(): bool
+    protected static function migrationsHaveBeenPublished(): bool
     {
-        $publishedPath = database_path('migrations');
         $migrationFile = 'create_notification_preferences_table.php';
+        $migrator = app('migrator');
 
-        if (!is_dir($publishedPath)) {
-            return false;
-        }
+        foreach ($migrator->paths() as $path) {
+            if (!is_dir($path)) {
+                continue;
+            }
 
-        $files = scandir($publishedPath);
-        foreach ($files as $file) {
-            if (str_contains($file, $migrationFile)) {
-                return true;
+            $files = scandir($path);
+            foreach ($files as $file) {
+                if (str_contains($file, $migrationFile)) {
+                    return true;
+                }
             }
         }
 
