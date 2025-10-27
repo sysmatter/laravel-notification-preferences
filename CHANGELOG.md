@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.2](https://github.com/sysmatter/laravel-notification-preferences/compare/v1.1.1...v1.1.2) (2025-10-27)
+
+
+### Bug Fixes
+
+* **provider:** make migration published check more flexible for alt architecture ([#6](https://github.com/sysmatter/laravel-notification-preferences/issues/6)) ([025b233](https://github.com/sysmatter/laravel-notification-preferences/commit/025b233d275b51d47cd4f693af708341c13e9407))
+
 ## [1.1.1](https://github.com/sysmatter/laravel-notification-preferences/compare/v1.1.0...v1.1.1) (2025-10-15)
 
 
