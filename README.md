@@ -1,9 +1,4 @@
-# Laravel Notification Preferences
-
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/sysmatter/laravel-notification-preferences.svg?style=flat-square)](https://packagist.org/packages/sysmatter/laravel-notification-preferences)
-[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/sysmatter/laravel-notification-preferences/tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/sysmatter/laravel-notification-preferences/actions?query=workflow%3Atests+branch%3Amain)
-[![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/sysmatter/laravel-notification-preferences/code-style.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/sysmatter/laravel-notification-preferences/actions?query=workflow%3A"code+style"+branch%3Amain)
-[![Total Downloads](https://img.shields.io/packagist/dt/sysmatter/laravel-notification-preferences.svg?style=flat-square)](https://packagist.org/packages/sysmatter/laravel-notification-preferences)
+# Laravel Notification Preferences Packaged Moved -> [offload-project/laravel-notification-preferences](https://github.com/offload-project/laravel-notification-preferences)
 
 A Laravel package for managing user notification preferences with support for multiple channels, notification groups,
 and a structured table output for display.

@@ -9,11 +9,10 @@
         "notification",
         "preferences"
     ],
+    "abandoned": "offload-project/laravel-notification-preferences",
     "authors": [
         {
-            "name": "Shavonn Brown",
-            "email": "shavonn@sysmatter.com",
-            "role": "Developer"
+            "name": "SysMatter"
         }
     ],
     "scripts": {
@@ -26,10 +25,7 @@
         "pint": "vendor/bin/pint ./src ./tests ./config"
     },
     "require": {
-        "php": "^8.2",
-        "illuminate/support": "^11.0|^12.0",
-        "illuminate/notifications": "^11.0|^12.0",
-        "illuminate/database": "^11.0|^12.0"
+        "offload-project/laravel-notification-preferences": "^1.0"
     },
     "require-dev": {
         "larastan/larastan": "*",
@@ -40,9 +36,7 @@
         "phpstan/extension-installer": "^1.4",
         "phpstan/phpstan": "^2.1",
         "phpstan/phpstan-phpunit": "^2.0",
-        "phpunit/phpunit": "^10|^11.5",
-        "captainhook/captainhook": "^5.25",
-        "captainhook/plugin-composer": "^5.3"
+        "phpunit/phpunit": "^10|^11.5"
     },
     "autoload": {
         "psr-4": {
@@ -64,8 +58,7 @@
     "config": {
         "allow-plugins": {
             "pestphp/pest-plugin": true,
-            "phpstan/extension-installer": true,
-            "captainhook/plugin-composer": true
+            "phpstan/extension-installer": true
         }
     }
 }
