@@ -1,5 +1,16 @@
 # Changelog
 
+## [2.0.0](https://github.com/sysmatter/laravel-notification-preferences/compare/v1.2.1...v2.0.0) (2025-12-16)
+
+
+### ⚠ BREAKING CHANGES
+
+* deprecate package in favor of offload-project/laravel-notification-preferences ([#13](https://github.com/sysmatter/laravel-notification-preferences/issues/13))
+
+### Miscellaneous Chores
+
+* deprecate package in favor of offload-project/laravel-notification-preferences ([#13](https://github.com/sysmatter/laravel-notification-preferences/issues/13)) ([aa3ab69](https://github.com/sysmatter/laravel-notification-preferences/commit/aa3ab69f05b28e74dcdf7f332231afe22920a6a6))
+
 ## [1.2.1](https://github.com/sysmatter/laravel-notification-preferences/compare/v1.2.0...v1.2.1) (2025-10-27)
 
 
